@@ -1,5 +1,4 @@
 
-
 rareboost <- function(x,
                       yname,
                       treedepth = 3,
@@ -27,16 +26,20 @@ get_prediction_rare <- function(x, treedepth, m) {
     weights        <- update_weights_pos_neg(x$y, y_hat_mat[, i], weights,
                                              alpha_pos[i], alpha_neg[i])
   }
-
 }
-
+y_hat = y_hat_mat[, i]
+y = x$y
+w = weights
 get_alpha_pos <- function(y, yhat, w) {
   y_yhat_pos <- y[yhat > 0]
   yhat_pos   <- yhat[yhat > 0]
   w_yhat_pos <- w[yhat > 0]
   TP <- sum(w_yhat_pos[y_yhat_pos > 0] * yhat_pos[y_yhat_pos > 0])
   FP <- sum(w_yhat_pos[y_yhat_pos < 0] * yhat_pos[y_yhat_pos < 0])
-  return(0.5 * log(TP / FP))
+  log_TP_FP <- log(TP / FP)
+  # safety net for the beginning of the algorithm
+  if (is.nan(TP_FP)) log_TP_FP <- log(1 / length(y))
+  return(0.5 * log_TP_FP)
 }
 
 get_alpha_neg <- function(y, yhat, w) {
@@ -45,7 +48,9 @@ get_alpha_neg <- function(y, yhat, w) {
   w_yhat_neg <- w[yhat < 0]
   TN <- sum(w_yhat_neg[y_yhat_neg < 0] * yhat_neg[y_yhat_neg < 0])
   FN <- sum(w_yhat_neg[y_yhat_neg > 0] * yhat_neg[y_yhat_neg > 0])
-  return(0.5 * log(TN / FN))
+  log_TN_FN <- log(TN / FN)
+  if (is.nan(log_TN_FN)) log_TN_FN <- log(1 / length(y))
+  return(0.5 * log_TN_FN)
 }
 
 update_weights_pos_neg <- function(y, yhat, w, alpha_p, alpha_n) {

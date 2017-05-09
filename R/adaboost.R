@@ -99,5 +99,3 @@ score_adaboost <- function(adaboost_obj,
   return(final_mod(prediction_mat_score, adaboost_obj$alpha_vec))
 }
 
-ada = adaboost(xtrain, "y")
-table(score_adaboost(ada, xtest)$prediction, xtest$y)
